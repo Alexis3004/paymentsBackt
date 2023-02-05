@@ -1,0 +1,43 @@
+{
+  "name": "payments",
+  "version": "1.0.0",
+  "description": "servico de pagos móvil",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alexis3004/paymentsBackt.git"
+  },
+  "keywords": [
+    "pagos"
+  ],
+  "author": "Alexis Cáceres",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Alexis3004/paymentsBackt/issues"
+  },
+  "homepage": "https://github.com/Alexis3004/paymentsBackt#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "module-alias": "^2.2.2"
+  },
+  "_moduleAliases": {
+    "@": ".",
+    "@config": "./config",
+    "@routes": "./routes",
+    "@plugins": "./plugins",
+    "@controllers": "./app/controllers",
+    "@middlewares": "./app/middlewares",
+    "@models": "./app/models",
+    "@helpers": "./app/helpers"
+  }
+}
