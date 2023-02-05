@@ -6,4 +6,3 @@ const Server = require('@plugins/server')
 const server = new Server()
 
 server.httpListen(config.ports.http)
-server.httpsListen(config.ports.https)
