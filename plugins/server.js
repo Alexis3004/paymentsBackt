@@ -4,11 +4,8 @@ const routes = require('@routes/api')
 
 const express = require('express')
 const http = require('http')
-const https = require('https')
+// const https = require('https')
 const cors = require('cors')
-
-const fs = require('fs')
-const path = require('path')
 
 class Server {
     configCors = {
@@ -21,6 +18,7 @@ class Server {
         this.http = http.createServer(this.app)
 
         this.app.use(cors(this.configCors))
+        this.app.use(express.json());
 
         this.app.use('/', routes);
     }
