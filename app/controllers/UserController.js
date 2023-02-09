@@ -380,11 +380,13 @@ class UserController {
             res.status(response.status).send(response);
         } catch (error) {
             console.log(error)
-            response.errors.push({
-                "msg": "Error interno del sistema",
-                "param": '',
-                "location": "server"
-            });
+            if (response.errors.length === 0) {
+                response.errors.push({
+                    "msg": "Error interno del sistema",
+                    "param": '',
+                    "location": "server"
+                });
+            }
             res.status(response.status).send(response);
         }
     }
