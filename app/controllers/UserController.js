@@ -248,6 +248,37 @@ class UserController {
         }
     }
 
+    static async logout(req, res) {
+        const response = {
+            data: [],
+            errors: [],
+            meta: {},
+            links: {
+                api: config.server,
+            },
+            status: 500,
+        };
+        try {
+            const request = req.body;
+            request.apiToken.id
+
+            const user = await User.findOne({ _id: request.apiToken.id });
+            user.api_token = ''
+            await user.save();
+
+            response.status = 201;
+            res.status(response.status).send(response);
+        } catch (error) {
+            console.log(error)
+            response.errors.push({
+                "msg": "Error interno del sistema",
+                "param": '',
+                "location": "server"
+            });
+            res.status(response.status).send(response);
+        }
+    }
+
     static async update(req, res) {
         const response = {
             data: [],

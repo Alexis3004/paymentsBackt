@@ -15,6 +15,7 @@ router.get('/', (req, res) => {
 
 router.post('/login', ErrorHandlingMiddleware, UserController.login)
 router.post('/register', ErrorHandlingMiddleware, UserController.register)
+router.post('/logout', AuthMiddleware, ErrorHandlingMiddleware, UserController.logout)
 router.post('/actualizar-token', AuthMiddleware, ErrorHandlingMiddleware, UserController.actualizarToken)
 router.patch('/user/update/pin/:id', AuthMiddleware, ErrorHandlingMiddleware, UserController.updatePin)
 router.patch('/user/update/:id', AuthMiddleware, ErrorHandlingMiddleware, UserController.update)
