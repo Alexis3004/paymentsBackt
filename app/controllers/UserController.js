@@ -1,4 +1,5 @@
 const User = require("@models/User");
+const Transaccion = require("@models/Transaccion");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("@config/app");
@@ -70,7 +71,7 @@ class UserController {
                     "param": 'password',
                     "location": "database"
                 });
-                response.status = 401;
+                response.status = 422;
                 throw new Error("Contraseña incorrecta.");
             }
             // console.log(user);
@@ -260,7 +261,6 @@ class UserController {
         };
         try {
             const request = req.body;
-            request.apiToken.id
 
             const user = await User.findOne({ _id: request.apiToken.id });
             user.api_token = ''
@@ -370,6 +370,8 @@ class UserController {
 
             let user = await User.findOne({ _id: request.apiToken.id });
             user.pin = Number(request.pin)
+            // todo falta validar que no esté enviando el mismo pin
+            user.intentos = 0
             user = await user.save();
 
             response.status = 201;
@@ -383,6 +385,72 @@ class UserController {
             if (response.errors.length === 0) {
                 response.errors.push({
                     "msg": "Error interno del sistema",
+                    "param": '',
+                    "location": "server"
+                });
+            }
+            res.status(response.status).send(response);
+        }
+    }
+
+    static async consultarSaldo(req, res) {
+        const response = {
+            data: [],
+            errors: [],
+            meta: {},
+            links: {
+                api: config.server,
+            },
+            status: 500,
+        };
+        try {
+            const request = req.body;
+            var transacciones = await Transaccion.find({ $or:[ {destinatario: request.apiToken.id}, {remitente: request.apiToken.id} ]}, 'tipo valor remitente destinatario').exec()
+            console.log('transacciones',transacciones)
+            let saldo = 0
+            if (transacciones.length > 0) {
+                const gastos = transacciones.filter(item => item.remitente == request.apiToken.id).reduce((prev, current) => prev + current.valor, 0)
+                const ingresos = transacciones.filter(item => item.destinatario == request.apiToken.id).reduce((prev, current) => prev + current.valor, 0)
+                saldo = ingresos - gastos
+            }
+            response.data = {
+                type: 'Saldo',
+                value: saldo
+            }
+            response.status = 200
+            res.status(200).send(response)
+        } catch(err) {
+            if (response.errors.length === 0) {
+                response.errors.push({
+                    "msg": "Error interno del sistema",
+                    "param": '',
+                    "location": "server"
+                });
+            }
+            res.status(response.status).send(response);
+        }
+    }
+
+    static async consultarMovimientos(req, res) {
+        const response = {
+            data: [],
+            errors: [],
+            meta: {},
+            links: {
+                api: config.server,
+            },
+            status: 500,
+        };
+        try {
+            const request = req.body;
+            const transacciones = await Transaccion.find({ $or:[ {destinatario: request.apiToken.id}, {remitente: request.apiToken.id} ]}).sort({fecha: 'desc'}).exec()
+            response.data = transacciones
+            response.status = 200
+            res.status(200).send(response)
+        } catch(err) {
+            if (response.errors.length === 0) {
+                response.errors.push({
+                    "msg": "Error interno del sistema al consultar las transacciones",
                     "param": '',
                     "location": "server"
                 });
