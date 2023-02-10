@@ -78,7 +78,6 @@ class TransaccionController {
             transaccion.destinatario = request.apiToken.id
             transaccion.remitente = ''
             transaccion.tienda = ''
-            transaccion.banco = ''
             transaccion.banco = request.banco
             transaccion = await transaccion.save()
             response.status = 201;
@@ -173,6 +172,99 @@ class TransaccionController {
             transaccion.remitente = request.apiToken.id
             transaccion.tienda = request.tienda
             transaccion.banco = ''
+            transaccion = await transaccion.save()
+            response.status = 201;
+            response.data = {
+                type: "transaccion",
+                attributes: transaccion,
+            };
+            res.status(response.status).send(response);
+        } catch (error) {
+            console.log(error)
+            if (response.errors.length === 0) {
+                response.errors.push({
+                    "msg": "Error interno del sistema",
+                    "param": '',
+                    "location": "server"
+                });
+            }
+            res.status(response.status).send(response);
+        }
+    }
+
+    static async transferir(req, res) {
+        const response = {
+            data: [],
+            errors: [],
+            meta: {},
+            links: {
+                api: config.server,
+            },
+            status: 500,
+        };
+        try {
+            const request = req.body;//request.apiToken.id
+
+            // await check('pin').notEmpty().bail().custom((value, { req }) => Number(value) !== NaN).bail().isLength({ min: 6, max: 6 }).run(req);
+            // await check('telefono').if((value, { req }) => !req.body.email).notEmpty().run(req);
+            // await check('password').notEmpty().bail().isLength({ min: 4 }).run(req);
+
+            // const result = validationResult(req);
+            // if (!result.isEmpty()) {
+            //     response.errors = result.array()
+            //     response.status = 422;
+            //     throw new Error("Errores de validación.");
+            // }
+
+            let userT = null;
+            if (request.email && request.email.trim() != "") {
+                userT = await User.findOne({ email: request.email.trim() });
+            } else if (request.telefono && request.telefono != "") {
+                userT = await User.findOne({
+                    telefono: request.telefono,
+                });
+            }
+
+            if (userT === null) {
+                response.errors.push({
+                    "msg": "El Usuario al que se le va a transferir no fue encontrado.",
+                    "param": '',
+                    "location": "database"
+                });
+                response.status = 422;
+                throw new Error("El Usuario al que se le va a transferir no fue encontrado.");
+            }
+
+            let user = await User.findOne({ _id: request.apiToken.id });
+            if (user.intentos > 2) {
+                response.errors.push({
+                    "msg": "Pin bloqueado, debe cambiarlo.",
+                    "param": 'intentos',
+                    "location": "body"
+                });
+                response.status = 422;
+                throw new Error("Pin bloqueado, debe cambiarlo.");
+            }
+
+            if (user.pin != request.pin) {
+                user.intentos = user.intentos + 1
+                await user.save()
+
+                response.errors.push({
+                    "msg": "Pin incorrecto.",
+                    "param": 'pin',
+                    "location": "body"
+                });
+                response.status = 422;
+                throw new Error("Pin incorrecto.");
+            }
+
+            let transaccion = Transaccion()
+            transaccion.tipo = 'Transferencia'
+            transaccion.valor = request.valor
+            transaccion.destinatario = userT._id
+            transaccion.remitente = request.apiToken.id
+            transaccion.tienda = ''
             transaccion.banco = ''
             transaccion = await transaccion.save()
             response.status = 201;

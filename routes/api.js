@@ -27,6 +27,7 @@ router.get('/user/movimientos', AuthMiddleware, ErrorHandlingMiddleware, UserCon
 
 router.post('/transaccion/recargar', AuthMiddleware, ErrorHandlingMiddleware, TransaccionController.recargar)
 router.post('/transaccion/pagar', AuthMiddleware, ErrorHandlingMiddleware, TransaccionController.pagar)
+router.post('/transaccion/transferir', AuthMiddleware, ErrorHandlingMiddleware, TransaccionController.transferir)
 
 router.get('/asociados', BancoController.index)
 router.get('/tiendas', TiendaController.index)
